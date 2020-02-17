@@ -16,6 +16,8 @@ int generation = 0;
 
 bool start = false;
 
+bool toggle = false;
+
 struct sqaure {
     int limit_x;
     int limit_y;
@@ -75,7 +77,7 @@ void Game::handleEvents() {
             handleClick();
             break;
         case SDL_KEYDOWN:
-            if(e.type == 768) start = true;
+            if(e.type == 768) start = !start;
             break;
         default:
             break;
