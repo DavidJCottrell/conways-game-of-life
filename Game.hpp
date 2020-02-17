@@ -18,6 +18,8 @@ public:
 
     void DrawTriangle(SDL_Renderer* renderer);
     void DrawGrid(SDL_Renderer* renderer);
+    void clearGrid();
+    void tick();
 
     void handleClick();
 

@@ -4,11 +4,8 @@
 
 const unsigned int microseconds = 150000; //250000
 
-const int grid_width = 940;
-const int grid_height = 780;
-
-// const int grid_width = 640;
-// const int grid_height = 480;
+const int grid_width = 940; //640
+const int grid_height = 780; //480
 
 const int grid_gap = 20;
 
@@ -16,9 +13,7 @@ int generation = 0;
 
 bool start = false;
 
-bool toggle = false;
-
-struct sqaure {
+struct cell {
     int limit_x;
     int limit_y;
     int x; // X position in grid
@@ -26,7 +21,7 @@ struct sqaure {
     bool active;
 };
 
-sqaure grid[grid_width/grid_gap][grid_height/grid_gap];
+cell grid[grid_width/grid_gap][grid_height/grid_gap];
 
 Game::Game() {}
 
@@ -58,7 +53,7 @@ bool Game::init(const char *title, int xpos, int ypos, int width, int height) {
     //Fill grid array with square structs
     for (int x = 0; x < grid_width/grid_gap; x++)
         for (int y = 0; y < grid_height/grid_gap; y++)
-            grid[x][y] = (sqaure){ (x+1)*grid_gap , (y+1)*grid_gap, x, y, false };
+            grid[x][y] = (cell){ (x+1)*grid_gap , (y+1)*grid_gap, x, y, false };
 
     //Everything has been setup successfully by this point
     isRunning = true;
@@ -77,7 +72,8 @@ void Game::handleEvents() {
             handleClick();
             break;
         case SDL_KEYDOWN:
-            if(e.type == 768) start = !start;
+            if(e.key.keysym.sym == SDLK_SPACE) start = !start;
+            if(e.key.keysym.sym == SDLK_BACKSPACE) clearGrid();
             break;
         default:
             break;
@@ -85,18 +81,24 @@ void Game::handleEvents() {
 }
 
 
+void Game::clearGrid(){
+    for (int x = 0; x < grid_width/grid_gap; x++)
+        for (int y = 0; y < grid_height/grid_gap; y++)
+            grid[x][y].active = false;
+}
+
 /*
         (x-1, y+1) (x, y+1 ) (x+1, y+1 )
-             [ * ] [ * ] [ * ]
-    (x-1, y) [ * ] [ 0 ] [ * ] (x+1, y)
-             [ * ] [ * ] [ * ] 
+             [   ] [   ] [   ]
+    (x-1, y) [   ] [ X ] [   ] (x+1, y)
+             [   ] [   ] [   ] 
         (x-1, y-1) (x, y-1 ) (x+1, y-1 )
 */
-void tick(){
+void Game::tick(){
 
     // *** RULES NEED TO APPLIED SIMULTANEOUSLY SO CHANGES ARE MADE TO THE COPY, THEN COPIED BACK TO THE ORIGINAL ***
 
-    sqaure grid_copy[grid_width/grid_gap][grid_height/grid_gap];
+    cell grid_copy[grid_width/grid_gap][grid_height/grid_gap];
     //Create copy of current grid
     for (int x = 0; x < grid_width/grid_gap; x++)
         for (int y = 0; y < grid_height/grid_gap; y++)
@@ -141,7 +143,6 @@ void Game::handleClick(){
 
     if(start) return;
     
-
     //repeat for number of rows and columns
     for (int x = 0; x < grid_width/grid_gap; x++){
         for (int y = 0; y < grid_height/grid_gap; y++){
