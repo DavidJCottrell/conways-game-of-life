@@ -16,7 +16,6 @@ clean:
 	@echo Cleaning...
 	@rm *.o game
 	@echo Complete.
-	#clear
 
 run:
 	@echo Running game...

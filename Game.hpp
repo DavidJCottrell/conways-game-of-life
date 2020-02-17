@@ -12,16 +12,14 @@ public:
 
     bool init(const char* title, int xpos, int ypos, int width, int height);
     void handleEvents();
-    void update(); //Loop through all game objects
     void render();
     void clean(); //memory management
 
-    void DrawTriangle(SDL_Renderer* renderer);
     void DrawGrid(SDL_Renderer* renderer);
     void clearGrid();
     void tick();
 
-    void handleClick();
+    void handleClick(int key);
 
     bool running() { return isRunning; }
 
@@ -29,6 +27,7 @@ private:
     bool isRunning;
     SDL_Window *window;
     SDL_Renderer *renderer;
+
     
 };
 

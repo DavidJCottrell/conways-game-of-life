@@ -2,16 +2,33 @@
 #include <iostream>
 #include <unistd.h>
 
-const unsigned int microseconds = 150000; //250000
+/*
 
-const int grid_width = 940; //640
-const int grid_height = 780; //480
+-- small dimensions --
+width: 640
+height: 480
+
+-- medium dimensions --
+width: 940
+height: 780
+
+-- large dimensions --
+width: 1040
+height: 880
+
+*/
+
+const int grid_width = 840; //640
+const int grid_height = 680; //480
 
 const int grid_gap = 20;
 
-int generation = 0;
+const unsigned int gameSpeed = 150000; // In microseconds
 
 bool start = false;
+
+bool leftMouseDown = false;
+bool rightMouseDown = false;
 
 struct cell {
     int limit_x;
@@ -23,10 +40,25 @@ struct cell {
 
 cell grid[grid_width/grid_gap][grid_height/grid_gap];
 
-Game::Game() {}
+Game::Game() {
+    //Fill grid array with square structs
+    for (int x = 0; x < grid_width/grid_gap; x++)
+        for (int y = 0; y < grid_height/grid_gap; y++)
+            grid[x][y] = (cell){ (x+1)*grid_gap , (y+1)*grid_gap, x, y, false };
+    
+    std::cout << "\n--------------------------- " << std::endl;
+    std::cout << "- Create cells by left clicking or holding left click and dragging. (Game must be stopped first)" << std::endl;
+    std::cout << "- Delete cells by the same way but right clicking." << std::endl;
+    std::cout << "- Clear grid by pressing backspace." << std::endl;
+    std::cout << "- Press space to start/stop...\n" << std::endl;
+}
 
-Game::~Game() {}
+Game::~Game() {
+    std::cout << "\n\n-- Exiting." << std::endl;
+    std::cout << "\n--------------------------- " << std::endl;
+}
 
+//initialize SDL
 bool Game::init(const char *title, int xpos, int ypos, int width, int height) {
 
     // Initialize SDL2
@@ -50,50 +82,19 @@ bool Game::init(const char *title, int xpos, int ypos, int width, int height) {
         return false;
     }
 
-    //Fill grid array with square structs
-    for (int x = 0; x < grid_width/grid_gap; x++)
-        for (int y = 0; y < grid_height/grid_gap; y++)
-            grid[x][y] = (cell){ (x+1)*grid_gap , (y+1)*grid_gap, x, y, false };
-
     //Everything has been setup successfully by this point
     isRunning = true;
-    std::cout << "Press space to start" << std::endl;
     return true;
 }
 
-void Game::handleEvents() {
-    SDL_Event e;
-    SDL_PollEvent(&e);
-    switch (e.type){
-        case SDL_QUIT:
-            isRunning = false;
-            break;
-        case SDL_MOUSEBUTTONDOWN:
-            handleClick();
-            break;
-        case SDL_KEYDOWN:
-            if(e.key.keysym.sym == SDLK_SPACE) start = !start;
-            if(e.key.keysym.sym == SDLK_BACKSPACE) clearGrid();
-            break;
-        default:
-            break;
-    }
-}
-
-
+// Sets all cell's active property to false
 void Game::clearGrid(){
     for (int x = 0; x < grid_width/grid_gap; x++)
         for (int y = 0; y < grid_height/grid_gap; y++)
             grid[x][y].active = false;
 }
 
-/*
-        (x-1, y+1) (x, y+1 ) (x+1, y+1 )
-             [   ] [   ] [   ]
-    (x-1, y) [   ] [ X ] [   ] (x+1, y)
-             [   ] [   ] [   ] 
-        (x-1, y-1) (x, y-1 ) (x+1, y-1 )
-*/
+//Apply rules to each cell
 void Game::tick(){
 
     // *** RULES NEED TO APPLIED SIMULTANEOUSLY SO CHANGES ARE MADE TO THE COPY, THEN COPIED BACK TO THE ORIGINAL ***
@@ -108,19 +109,23 @@ void Game::tick(){
     for (int x = 0; x < grid_width/grid_gap; x++){
         for (int y = 0; y < grid_height/grid_gap; y++){
 
-            //Get number of alive aliveNeighbors
-
-            if(grid[x-1][y+1].active) aliveNeighbors++; // Top left
-            if(grid[x][y+1].active) aliveNeighbors++;   // Top
-            if(grid[x+1][y+1].active) aliveNeighbors++; // Top right
-
-            if(grid[x+1][y].active) aliveNeighbors++;   // Right
-            if(grid[x-1][y].active) aliveNeighbors++;   // Left
-
-            if(grid[x+1][y-1].active) aliveNeighbors++; // Bottom right
-            if(grid[x][y-1].active) aliveNeighbors++;   // Bottom
-            if(grid[x-1][y-1].active) aliveNeighbors++; // Bottom left
-
+            //Check if top cell exists
+            if(y > 0) if(grid[x][y-1].active) aliveNeighbors++; // Check if top is alive
+            //Check if top right cell exists
+            if(x < grid_width/grid_gap - 1 || y > 0) if(grid[x+1][y-1].active) aliveNeighbors++; // Check if top right cell is alive
+            //Check if right cell exists
+            if(x < grid_width/grid_gap - 1) if(grid[x+1][y].active) aliveNeighbors++; // Check if right is alive
+            //Check if bottom right cell exists
+            if(y < grid_height/grid_gap - 1 || x < grid_width/grid_gap - 1 ) if(grid[x+1][y+1].active) aliveNeighbors++; // Check if bottom right is alive
+            //Check if bottom cell exists
+            if(y < grid_height/grid_gap - 1) if(grid[x][y+1].active) aliveNeighbors++; // Check if bottom is alive
+            //Check if bottom left cell exists
+            if(x > 0 || y < grid_height/grid_gap - 1) if(grid[x-1][y+1].active) aliveNeighbors++; // Check if bottom left is alive
+            //Check if left cell exists
+            if(x > 0) if(grid[x-1][y].active) aliveNeighbors++; // Check if left is alive
+            //Check if top left cell exists
+            if(x > 0 || y > 0) if(grid[x-1][y-1].active) aliveNeighbors++; // Check if top left is alive
+            
             if(grid[x][y].active){
                 if(aliveNeighbors < 2 || aliveNeighbors > 3) grid_copy[x][y].active = false;
             }
@@ -132,16 +137,53 @@ void Game::tick(){
     for (int x = 0; x < grid_width/grid_gap; x++)
         for (int y = 0; y < grid_height/grid_gap; y++)
             grid[x][y] = grid_copy[x][y];
-    
-    std::cout << "Generation: " << generation << std::endl;
-    generation++;
 }
 
-void Game::handleClick(){
-    int xMouse, yMouse;
-    SDL_GetMouseState(&xMouse, &yMouse);
 
+void Game::handleEvents() {
+    SDL_Event e;
+    SDL_PollEvent(&e);
+    switch (e.type){
+        case SDL_QUIT:
+            isRunning = false;
+            break;
+        case SDL_MOUSEBUTTONDOWN:
+                if(e.button.button == SDL_BUTTON_LEFT) handleClick(SDL_BUTTON_LEFT);
+                else handleClick(SDL_BUTTON_RIGHT);
+            break;
+        case SDL_MOUSEBUTTONUP:
+            leftMouseDown = false; //Disable mouse drag
+            rightMouseDown = false; //Disable mouse drag
+            break;
+        case SDL_KEYDOWN:
+            if(e.key.keysym.sym == SDLK_SPACE){
+                start = !start; //Toggle game
+                if (start) std::cout << "-- Game started" << std::endl;
+                else std::cout << "-- Game stopped" << std::endl;
+            }
+            if(e.key.keysym.sym == SDLK_BACKSPACE){
+                clearGrid(); //Clear grid
+                std::cout << "-- Grid cleared" << std::endl;
+            }
+            break;
+        case SDL_MOUSEMOTION:
+            if (leftMouseDown) handleClick(SDL_BUTTON_LEFT); //Allow mouse drag draw
+            if (rightMouseDown) handleClick(SDL_BUTTON_RIGHT); //Allow mouse drag draw
+            break;
+        default:
+            break;
+    }
+}
+
+//Left click places the cell, right click deletes a placed cell
+void Game::handleClick(int key){
     if(start) return;
+
+    if(key == SDL_BUTTON_LEFT) leftMouseDown = true;
+    else rightMouseDown = true;
+
+    int xMouse, yMouse;
+    SDL_GetMouseState(&xMouse, &yMouse); //Get current mouse coordinates
     
     //repeat for number of rows and columns
     for (int x = 0; x < grid_width/grid_gap; x++){
@@ -149,28 +191,29 @@ void Game::handleClick(){
             //Check if clicked within limits of cell            
             if(xMouse < grid[x][y].limit_x && xMouse > grid[x][y].limit_x - grid_gap){
                 if(yMouse < grid[x][y].limit_y && yMouse > grid[x][y].limit_y - grid_gap){
-                    grid[x][y].active = true;
+                    if(key == SDL_BUTTON_LEFT) grid[x][y].active = true;
+                    else grid[x][y].active = false;
                 }
             }
         }
     }
 }
 
-void Game::update(){}
-
+//Render loop
 void Game::render(){
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
     SDL_RenderClear(renderer);
     DrawGrid(renderer);
     if(start){
         tick();
-        usleep(microseconds);
+        usleep(gameSpeed);
     }
-    
 }
 
+// Update game grid
 void Game::DrawGrid(SDL_Renderer* renderer){
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+    
+    SDL_SetRenderDrawColor(renderer, 35, 35, 35, SDL_ALPHA_OPAQUE);
 
     //Draw vertical lines
     for (int x = 1; x*grid_gap <= grid_width; x++){
@@ -186,8 +229,10 @@ void Game::DrawGrid(SDL_Renderer* renderer){
             grid_width, y*grid_gap
         );
     }
+
+    SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
     
-    //Update for clicked cells
+    //Update for clicked alive cells
     for (int x = 0; x < grid_width/grid_gap; x++){
         for (int y = 0; y < grid_height/grid_gap; y++){
             if(grid[x][y].active){
@@ -209,5 +254,3 @@ void Game::clean() {
     SDL_DestroyRenderer(renderer);
     SDL_Quit();
 }
-
-

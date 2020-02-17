@@ -3,17 +3,15 @@
 
 
 int main(){
-
     Game game;
-    game.init("Game of Life", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 940, 780);
+    bool successful = game.init("Game of Life", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 840, 680);
 
-    while (game.running()){
-        game.handleEvents();
-        game.update();
-        game.render();
+    if(successful){
+        while (game.running()){
+            game.handleEvents();
+            game.render();
+        }
+        game.clean();
     }
-
-    game.clean();
-
     return 0;
 }
