@@ -3,6 +3,9 @@
  
 #include <SDL2/SDL.h>
 #include <SDL2_image/SDL_image.h>
+#include <iostream>
+#include <unistd.h>
+#include <algorithm> // std::copy
 
 class Game {
 public:

@@ -1,6 +1,4 @@
 #include "Game.hpp"
-#include <iostream>
-#include <unistd.h>
 
 /*
 
@@ -9,8 +7,8 @@ width: 640
 height: 480
 
 -- medium dimensions --
-width: 940
-height: 780
+width: 840
+height: 680
 
 -- large dimensions --
 width: 1040
@@ -21,9 +19,9 @@ height: 880
 const int grid_width = 840; //640
 const int grid_height = 680; //480
 
-const int grid_gap = 20;
+const int grid_gap = 10;
 
-const unsigned int gameSpeed = 150000; // In microseconds
+const unsigned int gameSpeed = 100000; // In microseconds
 
 bool start = false;
 
@@ -127,12 +125,17 @@ void Game::tick(){
             if(x > 0 || y > 0) if(grid[x-1][y-1].active) aliveNeighbors++; // Check if top left is alive
             
             if(grid[x][y].active){
-                if(aliveNeighbors < 2 || aliveNeighbors > 3) grid_copy[x][y].active = false;
+                if(aliveNeighbors < 2 || aliveNeighbors > 3){
+                    grid_copy[x][y].active = false;
+                }
             }
-            else if(aliveNeighbors == 3) grid_copy[x][y].active = true;
+            else if(aliveNeighbors == 3){
+                grid_copy[x][y].active = true;
+            }
             aliveNeighbors = 0;
         }
     }
+
     //Put contents into original array
     for (int x = 0; x < grid_width/grid_gap; x++)
         for (int y = 0; y < grid_height/grid_gap; y++)
@@ -230,7 +233,7 @@ void Game::DrawGrid(SDL_Renderer* renderer){
         );
     }
 
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+    SDL_SetRenderDrawColor(renderer, 0, 255, 0, SDL_ALPHA_OPAQUE);
     
     //Update for clicked alive cells
     for (int x = 0; x < grid_width/grid_gap; x++){
