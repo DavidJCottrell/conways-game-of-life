@@ -85,6 +85,21 @@ bool Game::init(const char *title, int xpos, int ypos, int width, int height) {
     return true;
 }
 
+void Game::premade(int layout){
+    if (layout == 1){
+        for (int x = 0; x < grid_width/grid_gap; x++)
+            for (int y = 0; y < grid_height/grid_gap; y++)
+                if(x == 0 || y == 0 || x == grid_width/grid_gap-1 || y == grid_height/grid_gap-1)
+                    grid[x][y].active = true;
+    }else if (layout == 2){
+        for (int x = 0; x < grid_width/grid_gap; x++)
+            for (int y = 0; y < grid_height/grid_gap; y++)
+                if(x == (grid_width/grid_gap-1)/2)
+                    grid[x][y].active = true;
+    }
+
+}
+
 // Sets all cell's active property to false
 void Game::clearGrid(){
     for (int x = 0; x < grid_width/grid_gap; x++)
@@ -150,29 +165,42 @@ void Game::handleEvents() {
         case SDL_QUIT:
             isRunning = false;
             break;
+        // Left/right mouse button down
         case SDL_MOUSEBUTTONDOWN:
                 if(e.button.button == SDL_BUTTON_LEFT) handleClick(SDL_BUTTON_LEFT);
                 else handleClick(SDL_BUTTON_RIGHT);
             break;
+        // Left/right mouse button up
         case SDL_MOUSEBUTTONUP:
             leftMouseDown = false; //Disable mouse drag
             rightMouseDown = false; //Disable mouse drag
-            break;
-        case SDL_KEYDOWN:
-            if(e.key.keysym.sym == SDLK_SPACE){
-                start = !start; //Toggle game
-                if (start) std::cout << "-- Game started" << std::endl;
-                else std::cout << "-- Game stopped" << std::endl;
-            }
-            if(e.key.keysym.sym == SDLK_BACKSPACE){
-                clearGrid(); //Clear grid
-                std::cout << "-- Grid cleared" << std::endl;
-            }
             break;
         case SDL_MOUSEMOTION:
             if (leftMouseDown) handleClick(SDL_BUTTON_LEFT); //Allow mouse drag draw
             if (rightMouseDown) handleClick(SDL_BUTTON_RIGHT); //Allow mouse drag draw
             break;
+        // Keyboard event
+        case SDL_KEYDOWN:
+            // Determine key pressed
+            switch (e.key.keysym.sym){
+                case SDLK_SPACE:
+                    start = !start; //Toggle game
+                    if (start) std::cout << "-- Game started" << std::endl;
+                    else std::cout << "-- Game stopped" << std::endl;
+                    break;
+                case SDLK_BACKSPACE:
+                    clearGrid(); //Clear grid
+                    std::cout << "-- Grid cleared" << std::endl;
+                    break;
+                case SDLK_q:
+                    premade(1);
+                    break;
+                case SDLK_w:
+                    premade(2);
+                    break;
+                default:
+                    break;
+            }
         default:
             break;
     }

@@ -20,6 +20,7 @@ public:
 
     void DrawGrid(SDL_Renderer* renderer);
     void clearGrid();
+    void premade(int layout);
     void tick();
 
     void handleClick(int key);
