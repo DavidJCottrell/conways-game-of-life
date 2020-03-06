@@ -5,7 +5,6 @@
 #include <SDL2_image/SDL_image.h>
 #include <iostream>
 #include <unistd.h>
-#include <algorithm> // std::copy
 
 class Game {
 public:
@@ -18,17 +17,18 @@ public:
     void render();
     void clean(); //memory management
 
-    void DrawGrid(SDL_Renderer* renderer);
-    void clearGrid();
-    void premade(int layout);
-    void tick();
-
-    void handleClick(int key);
-
     bool running() { return isRunning; }
 
 private:
     bool isRunning;
+
+    void DrawGrid(SDL_Renderer* renderer);
+    void clearGrid();
+    void premade(int layout); //Draw premade configurations
+    void tick();
+
+    void handleClick(int key);
+
     SDL_Window *window;
     SDL_Renderer *renderer;
 

@@ -22,3 +22,8 @@ run:
 	@./game
 
 cleanrun: run clean
+
+commit:
+	git add .
+	git commit -m "Update"
+	git push -u origin master
