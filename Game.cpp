@@ -16,12 +16,13 @@ height: 880
 
 */
 
-const int grid_width = 840; //640
-const int grid_height = 680; //480
+const int grid_width = 640; //640
+const int grid_height = 480; //480
 
 const int grid_gap = 10;
 
 const unsigned int gameSpeed = 100000; // In microseconds
+// const unsigned int gameSpeed = 100000; // In microseconds
 
 bool start = false;
 
