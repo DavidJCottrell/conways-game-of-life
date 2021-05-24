@@ -22,7 +22,6 @@ const int grid_height = 480; //480
 const int grid_gap = 10;
 
 const unsigned int gameSpeed = 100000; // In microseconds
-// const unsigned int gameSpeed = 100000; // In microseconds
 
 bool start = false;
 
