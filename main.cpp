@@ -1,13 +1,14 @@
-#include "Game.hpp"
 #include <string>
 
+#include "Game.hpp"
 
-int main(){
+int main() {
     Game game;
-    bool successful = game.init("Game of Life", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480);
+    bool successful = game.init("Game of Life", SDL_WINDOWPOS_CENTERED,
+                                SDL_WINDOWPOS_CENTERED, 640, 480);
 
-    if(successful){
-        while (game.running()){
+    if (successful) {
+        while (game.running()) {
             game.handleEvents();
             game.render();
         }
